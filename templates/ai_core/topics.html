@@ -1,0 +1,49 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Topics - {{ document.title }}{% endblock %}
+{% block page_title %}Topic Detection{% endblock %}
+{% block active_page %}topics{% endblock %}
+
+{% block content %}
+<div class="row g-4 animate-fade-in">
+    <!-- Config panel -->
+    <div class="col-lg-3">
+        <div class="premium-card">
+            <h5 class="mb-3 fw-bold"><i class="fas fa-project-diagram me-2 text-primary"></i>Topic Modeler</h5>
+            <p class="text-muted small" style="line-height:1.6;">Our AI clusters context chunks to isolate the central themes and subjects of your uploaded document.</p>
+        </div>
+    </div>
+
+    <!-- Topics Cards -->
+    <div class="col-lg-9">
+        <div class="premium-card">
+            <h5 class="mb-4 fw-bold"><i class="fas fa-tags me-2 text-primary"></i>Primary Subjects & Themes</h5>
+            
+            {% if topics %}
+                <div class="row g-4">
+                    {% for topic in topics %}
+                    <div class="col-md-6 col-xl-4">
+                        <div class="premium-card p-4 border-light h-100" style="border-left: 4px solid var(--accent) !important;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0 text-dark font-heading fw-bold" style="font-size:14px;">{{ topic.name }}</h6>
+                                <span class="badge bg-info rounded-pill" style="font-size: 11px; padding: 4px 8px;">{% widthratio topic.confidence 1 100 %}% Match</span>
+                            </div>
+                            <div class="progress-premium" style="height: 6px;">
+                                <div class="progress-bar-premium" style="width: {% widthratio topic.confidence 1 100 %}%; background: var(--gradient-accent);"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-project-diagram text-muted mb-3" style="font-size:48px; opacity:0.35;"></i>
+                    <h5 class="fw-bold mb-2">No Topics Identified</h5>
+                    <p class="text-muted small">Please verify that the document is processed successfully.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

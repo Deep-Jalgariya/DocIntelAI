@@ -1,0 +1,150 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% block title %}My Documents - DocIntel{% endblock %}
+{% block page_title %}My Documents{% endblock %}
+{% block active_page %}documents{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        <!-- Realtime Live Search Box -->
+        <div class="search-box-nav">
+            <i class="fas fa-search search-icon"></i>
+            <form method="GET" action="{% url 'documents:list' %}" onsubmit="return true;">
+                <input type="text" name="search" id="document-search-input" placeholder="Search documents..."
+                    value="{{ search }}" oninput="filterDocumentsLive(this.value)" autocomplete="off">
+            </form>
+        </div>
+
+        {% if documents %}
+        <div class="d-flex align-items-center gap-2 bg-white px-3 py-2 rounded-pill shadow-sm"
+            style="border: 1px solid var(--border-color); font-size: 13px;">
+            <input type="checkbox" id="select-all-docs" class="form-check-input cursor-pointer me-1"
+                onchange="toggleSelectAll(this)">
+            <label for="select-all-docs" class="cursor-pointer mb-0 fw-semibold text-secondary">Select All</label>
+        </div>
+
+        <button id="btn-bulk-delete"
+            class="btn btn-danger btn-sm rounded-pill px-3 d-none align-items-center gap-2 shadow-sm"
+            onclick="deleteSelectedDocuments()">
+            <i class="fas fa-trash-alt"></i> Delete Selected (<span id="selected-count">0</span>)
+        </button>
+        {% endif %}
+    </div>
+
+    <a href="{% url 'documents:upload' %}" class="btn-gradient-primary d-inline-flex align-items-center gap-2">
+        <i class="fas fa-cloud-upload-alt fs-6"></i> Upload New
+    </a>
+</div>
+
+<div class="row g-4">
+    {% if documents %}
+    {% for doc in documents %}
+    <div class="col-md-6 col-lg-4 col-xl-3 animate-fade-in" id="doc-{{ doc.id }}">
+        <div class="doc-card h-100 d-flex flex-column justify-content-between">
+            <div style="position: relative; z-index: 10;">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="checkbox" class="doc-checkbox form-check-input" value="{{ doc.id }}"
+                            onchange="updateSelectionState()" onclick="event.stopPropagation()">
+                        <div class="doc-icon {{ doc.file_type }} mb-0">
+                            <i
+                                class="fas fa-file-{% if doc.file_type == 'pdf' %}pdf{% elif doc.file_type == 'docx' %}word{% else %}alt{% endif %}"></i>
+                        </div>
+                    </div>
+                    <div class="doc-actions dropdown">
+                        <button class="btn btn-sm btn-icon" data-bs-toggle="dropdown"
+                            style="border: none; background: transparent; width:28px; height:28px;">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg"
+                            style="font-size:13.5px; z-index: 9999; background-color: var(--bg-card, #ffffff);">
+                            <li><a class="dropdown-item d-flex align-items-center gap-2"
+                                    href="{% url 'documents:viewer' doc.id %}"><i
+                                        class="fas fa-eye text-primary me-1"></i> View Doc</a></li>
+                            <li><a class="dropdown-item d-flex align-items-center gap-2"
+                                    href="{% url 'documents:download' doc.id %}"><i
+                                        class="fas fa-download text-success me-1"></i> Download</a></li>
+                            <li><button class="dropdown-item d-flex align-items-center gap-2"
+                                    onclick="renameDocument({{ doc.id }})"><i class="fas fa-edit text-warning me-1"></i>
+                                    Rename</button></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><button class="dropdown-item text-danger d-flex align-items-center gap-2"
+                                    onclick="deleteDocument({{ doc.id }}, '{{ doc.title|escapejs }}')"><i
+                                        class="fas fa-trash-alt text-danger me-1"></i> Delete</button></li>
+                        </ul>
+                    </div>
+                </div>
+                <h6 class="doc-title text-dark mb-1 fw-bold" title="{{ doc.title }}" style="font-size: 14.5px;">{{ doc.title }}</h6>
+                <div class="doc-meta d-flex justify-content-between align-items-center mt-2" style="font-size: 12.5px;">
+                    <span class="badge-premium badge-{{ doc.file_type }}" style="font-size: 10px; padding: 2px 8px;">{{ doc.file_type|upper }}</span>
+                    <span class="text-secondary">{{ doc.file_size_display }}</span>
+                </div>
+            </div>
+            <div style="position: relative; z-index: 1;">
+                <div class="text-muted mt-2 small" style="font-size: 11px;">
+                    Uploaded {{ doc.uploaded_at|date:"d M Y" }}
+                </div>
+                <div class="d-grid mt-3">
+                    <a href="{% url 'documents:detail' doc.id %}"
+                        class="btn btn-sm btn-outline-premium d-flex align-items-center justify-content-center gap-2"
+                        style="font-size: 12.5px; padding: 6px;">
+                        Open Workspace <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Live Search No Results Message -->
+    <div id="no-search-results" class="col-12 d-none">
+        <div class="empty-state premium-card py-5 text-center">
+            <i class="fas fa-search text-muted mb-3" style="font-size: 48px; opacity: 0.4;"></i>
+            <h5 class="fw-bold mb-1">No Matching Documents</h5>
+            <p class="text-muted small mb-0">No documents found matching your search query.</p>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="col-12">
+        <div class="empty-state premium-card py-5 text-center d-flex flex-column align-items-center justify-content-center"
+            style="min-height: 420px; background: linear-gradient(180deg, var(--bg-card) 0%, rgba(248,250,252,0.6) 100%); border-radius: var(--radius-2xl); border: 2px dashed rgba(99, 102, 241, 0.25); position: relative; overflow: hidden;">
+            <!-- Glowing Ambient Accent Circles -->
+            <div
+                style="position: absolute; width: 280px; height: 280px; background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(255,255,255,0) 70%); top: -60px; right: -60px; border-radius: 50%; pointer-events: none;">
+            </div>
+            <div
+                style="position: absolute; width: 280px; height: 280px; background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(255,255,255,0) 70%); bottom: -60px; left: -60px; border-radius: 50%; pointer-events: none;">
+            </div>
+
+            <!-- Animated Lottie Player -->
+            <div class="lottie-wrapper mb-3 position-relative"
+                style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;">
+                <lottie-player src="{% static 'json/upload_animation.json' %}" background="transparent" speed="1"
+                    style="width: 200px; height: 200px;" loop autoplay></lottie-player>
+            </div>
+
+            <h4 class="fw-bold mb-2 text-dark" style="font-size: 22px; letter-spacing: -0.3px;">No Documents Found</h4>
+            <p class="text-muted max-width-400 mx-auto mb-4"
+                style="font-size: 14.5px; line-height: 1.6; max-width: 420px;">
+                Upload a PDF, DOCX, or TXT file to get started with AI summaries, interactive chat, quizzes, and smart
+                analytics.
+            </p>
+
+            <a href="{% url 'documents:upload' %}"
+                class="btn-gradient-primary btn-lg rounded-pill px-4 py-3 shadow-lg hover-lift d-inline-flex align-items-center gap-2"
+                style="font-size: 15px; font-weight: 600; text-decoration: none;">
+                <i class="fas fa-cloud-upload-alt fs-5"></i> Upload Document Now
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'js/documents.js' %}?v=4"></script>
+{% endblock %}

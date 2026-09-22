@@ -1,0 +1,589 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}?v=3">
+<style>
+    :root {
+        --dash-ink-900: #0b1220;
+        --dash-ink-800: #0f172a;
+        --dash-ink-700: #1e293b;
+        --dash-slate-600: #475569;
+        --dash-slate-500: #64748b;
+        --dash-slate-400: #94a3b8;
+        --dash-border: #e2e8f0;
+        --dash-surface: #f1f5f9;
+        --dash-brand-500: #3b82f6;
+        --dash-brand-600: #2563eb;
+        --dash-violet-500: #6366f1;
+        --dash-danger-500: #ef4444;
+        --dash-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+        outline: 2px solid var(--dash-brand-500);
+        outline-offset: 2px;
+        border-radius: 6px;
+    }
+
+    /* ---- Override base sidebar for this page ---- */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 264px;
+        height: 100vh;
+        background: linear-gradient(180deg, var(--dash-ink-800) 0%, var(--dash-ink-900) 100%);
+        color: #e2e8f0;
+        padding: 26px 16px;
+        overflow-y: auto;
+        z-index: 1050;
+        transition: transform 0.3s var(--dash-ease);
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .sidebar::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 4px;
+    }
+
+    .sidebar .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 4px;
+        padding: 4px;
+    }
+
+    .sidebar .brand .brand-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--dash-brand-500), var(--dash-violet-500));
+        border-radius: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+        box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
+        flex-shrink: 0;
+    }
+
+    .sidebar .brand .brand-text {
+        font-size: 19px;
+        font-weight: 800;
+        color: #ffffff;
+        letter-spacing: -0.5px;
+    }
+
+    .sidebar .tagline {
+        font-size: 11px;
+        color: var(--dash-slate-500);
+        margin-bottom: 26px;
+        padding-left: 4px;
+        letter-spacing: 0.3px;
+    }
+
+    .sidebar .tagline span {
+        color: #60a5fa;
+    }
+
+    .sidebar .nav-section-title {
+        font-size: 10px;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 18px 12px 8px 12px;
+    }
+
+    .sidebar .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 10px 14px;
+        border-radius: 10px;
+        color: #94a3b8;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background 0.2s var(--dash-ease), color 0.2s var(--dash-ease), transform 0.2s var(--dash-ease);
+        margin-bottom: 2px;
+        position: relative;
+    }
+
+    .sidebar .nav-link i {
+        width: 20px;
+        font-size: 15px;
+        color: #64748b;
+        text-align: center;
+        transition: color 0.2s ease;
+    }
+
+    .sidebar .nav-link:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: #f1f5f9;
+        transform: translateX(2px);
+    }
+
+    .sidebar .nav-link:hover i {
+        color: #f1f5f9;
+    }
+
+    .sidebar .nav-link.active {
+        background: rgba(59, 130, 246, 0.14);
+        color: #60a5fa;
+        font-weight: 600;
+    }
+
+    .sidebar .nav-link.active i {
+        color: #60a5fa;
+    }
+
+    .sidebar .nav-link.active::before {
+        content: '';
+        position: absolute;
+        left: -16px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 20px;
+        background: linear-gradient(180deg, var(--dash-brand-500), var(--dash-violet-500));
+        border-radius: 0 3px 3px 0;
+    }
+
+    .sidebar .sidebar-footer {
+        margin-top: auto;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        padding-top: 14px;
+    }
+
+    .sidebar .sidebar-footer .nav-link {
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .sidebar .sidebar-footer .nav-link:hover {
+        color: #f87171;
+        background: rgba(239, 68, 68, 0.08);
+    }
+
+    .sidebar .sidebar-footer .nav-link i {
+        color: #64748b;
+    }
+
+    .sidebar .sidebar-footer .nav-link:hover i {
+        color: #f87171;
+    }
+
+    /* ---- Sidebar overlay ---- */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(11, 18, 32, 0.55);
+        backdrop-filter: blur(2px);
+        z-index: 1040;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    /* ---- Main Content ---- */
+    .main-content {
+        margin-left: 264px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--dash-surface);
+    }
+
+    /* ---- Top Navbar ---- */
+    .navbar-dashboard {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px) saturate(160%);
+        -webkit-backdrop-filter: blur(12px) saturate(160%);
+        padding: 14px 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--dash-border);
+        position: sticky;
+        top: 0;
+        z-index: 1030;
+        min-height: 70px;
+    }
+
+    .navbar-dashboard .page-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--dash-ink-800);
+        margin: 0;
+        letter-spacing: -0.3px;
+    }
+
+    .navbar-dashboard .navbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .navbar-dashboard .btn-icon {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: var(--dash-surface);
+        border-radius: 50%;
+        color: var(--dash-slate-600);
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s var(--dash-ease);
+        cursor: pointer;
+    }
+
+    .navbar-dashboard .btn-icon:hover {
+        background: #e2e8f0;
+        color: var(--dash-ink-800);
+        transform: translateY(-1px);
+    }
+
+    .navbar-dashboard .avatar-sm {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 1.5px var(--dash-border);
+    }
+
+    .navbar-dashboard .avatar-placeholder {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--dash-brand-500), var(--dash-violet-500));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 13px;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .navbar-dashboard .sidebar-toggle {
+        display: none;
+        background: var(--dash-ink-800);
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        font-size: 17px;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s ease;
+    }
+
+    .navbar-dashboard .sidebar-toggle:hover {
+        background: var(--dash-ink-700);
+    }
+
+    .navbar-dashboard .dropdown-toggle::after {
+        display: none;
+    }
+
+    .navbar-dashboard .dropdown-toggle {
+        border-radius: 50%;
+        padding: 0;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: box-shadow 0.2s ease;
+    }
+
+    .navbar-dashboard .dropdown-toggle:hover {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+    }
+
+    .navbar-dashboard .dropdown-menu {
+        border-radius: 14px;
+        border: 1px solid var(--dash-border);
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+        padding: 8px;
+        min-width: 210px;
+        margin-top: 10px !important;
+    }
+
+    .navbar-dashboard .dropdown-menu .dropdown-header {
+        font-weight: 700;
+        color: var(--dash-ink-800);
+        padding: 8px 12px 10px;
+        font-size: 13.5px;
+    }
+
+    .navbar-dashboard .dropdown-menu .dropdown-item {
+        padding: 9px 12px;
+        font-size: 14px;
+        color: var(--dash-slate-600);
+        border-radius: 9px;
+        transition: all 0.15s ease;
+    }
+
+    .navbar-dashboard .dropdown-menu .dropdown-item:hover {
+        background: var(--dash-surface);
+        color: var(--dash-ink-800);
+    }
+
+    .navbar-dashboard .dropdown-menu .dropdown-item.text-danger:hover {
+        background: #fef2f2;
+        color: #dc2626 !important;
+    }
+
+    .navbar-dashboard .dropdown-divider {
+        margin: 6px 4px;
+        border-color: var(--dash-border);
+    }
+
+    /* ---- Content Area ---- */
+    .content-area {
+        padding: 28px 32px;
+        flex: 1;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 992px) {
+        .sidebar {
+            transform: translateX(-100%);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar.open,
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+        .main-content {
+            margin-left: 0;
+        }
+
+        .navbar-dashboard .sidebar-toggle {
+            display: flex;
+        }
+
+        .sidebar-overlay.active,
+        .sidebar-overlay.show {
+            display: block;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .navbar-dashboard {
+            padding: 12px 16px;
+            min-height: 60px;
+        }
+
+        .navbar-dashboard .page-title {
+            font-size: 17px;
+        }
+
+        .content-area {
+            padding: 16px;
+        }
+
+        .navbar-dashboard .navbar-actions {
+            gap: 8px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+    <div class="brand">
+        <img src="{% static 'images/logo.png' %}" alt="DocIntel AI"
+            style="height: 42px; width: auto; object-fit: contain; flex-shrink: 0;">
+        <span class="brand-text">DocIntel AI</span>
+    </div>
+    <div class="tagline">
+        <span>Upload.</span> <span>Analyze.</span> <span>Search.</span> <span>Ask.</span> <span>Discover.</span>
+    </div>
+
+    <div class="sidebar-nav">
+        <div class="nav-section-title">Main</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if '/dashboard/' in request.path or request.path == '/dashboard' %}active{% endif %}"
+                    href="{% url 'dashboard:index' %}">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if '/documents/' in request.path %}active{% endif %}"
+                    href="{% url 'documents:list' %}">
+                    <i class="fas fa-folder-open"></i> Documents
+                </a>
+            </li>
+        </ul>
+
+        {% if document %}
+        <div class="nav-section-title">AI Tools</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if '/ai/chat/' in request.path %}active{% endif %}"
+                    href="{% url 'ai_core:chat' document.id %}">
+                    <i class="fas fa-comments"></i> AI Chat
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if '/ai/summary/' in request.path %}active{% endif %}"
+                    href="{% url 'ai_core:summary' document.id %}">
+                    <i class="fas fa-align-left"></i> Summaries
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if '/ai/quiz/' in request.path %}active{% endif %}"
+                    href="{% url 'ai_core:quiz' document.id %}">
+                    <i class="fas fa-question-circle"></i> Quiz
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if '/ai/flashcards/' in request.path %}active{% endif %}"
+                    href="{% url 'ai_core:flashcards' document.id %}">
+                    <i class="fas fa-clone"></i> Flashcards
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if '/ai/keywords/' in request.path %}active{% endif %}"
+                    href="{% url 'ai_core:keywords' document.id %}">
+                    <i class="fas fa-key"></i> Keywords
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if '/ai/ner/' in request.path %}active{% endif %}"
+                    href="{% url 'ai_core:ner' document.id %}">
+                    <i class="fas fa-tags"></i> Entities
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if '/ai/topics/' in request.path %}active{% endif %}"
+                    href="{% url 'ai_core:topics' document.id %}">
+                    <i class="fas fa-project-diagram"></i> Topics
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if '/ai/insights/' in request.path %}active{% endif %}"
+                    href="{% url 'ai_core:insights' document.id %}">
+                    <i class="fas fa-lightbulb"></i> Insights
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if '/analytics/' in request.path %}active{% endif %}"
+                    href="{% url 'analytics:document_analytics' document.id %}">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+            </li>
+        </ul>
+        {% endif %}
+
+        <div class="nav-section-title">Account</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if '/accounts/' in request.path and '/settings/' not in request.path %}active{% endif %}"
+                    href="{% url 'accounts:profile' %}">
+                    <i class="fas fa-user-circle"></i> Profile
+                </a>
+            </li>
+
+        </ul>
+    </div>
+
+    <div class="sidebar-footer">
+        <a class="nav-link" href="{% url 'accounts:logout' %}">
+            <i class="fas fa-sign-out-alt me-2"></i> Logout
+        </a>
+    </div>
+</nav>
+
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Top Navbar -->
+    <div class="navbar-dashboard">
+        <div class="d-flex align-items-center gap-3">
+            <button class="sidebar-toggle" id="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h5 class="page-title mb-0">{% block page_title %}Dashboard{% endblock %}</h5>
+        </div>
+        <div class="navbar-actions">
+            {% if user.is_authenticated %}
+            <div class="dropdown">
+                <button class="btn-icon dropdown-toggle" data-bs-toggle="dropdown" style="border:none;" aria-expanded="false">
+                    {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" class="avatar-sm" alt="avatar">
+                    {% else %}
+                    <div class="avatar-placeholder avatar-sm" style="font-size:13px;">
+                        {{ user.first_name|first|upper|default:user.username|first|upper }}
+                    </div>
+                    {% endif %}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg">
+                    <li>
+                        <h6 class="dropdown-header fw-bold text-dark">{{ user.get_full_name|default:user.username }}</h6>
+                    </li>
+                    <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i
+                                class="fas fa-user me-2 text-primary"></i>Profile</a></li>
+                    <li><a class="dropdown-item" href="{% url 'ai_core:settings' %}"><i
+                                class="fas fa-cog me-2 text-secondary"></i>Settings</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}"><i
+                                class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+            {% else %}
+            <div class="d-flex align-items-center gap-2">
+                <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">Log in</a>
+                <a href="{% url 'accounts:register' %}" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">Sign Up</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="content-area">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+{% block page_js %}{% endblock %}
+{% endblock %}

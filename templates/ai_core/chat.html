@@ -1,0 +1,444 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% block title %}Chat - {{ document.title }}{% endblock %}
+{% block page_title %}Chat with Document{% endblock %}
+{% block active_page %}chat{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    :root {
+        --dio-brand-500: #3b82f6;
+        --dio-brand-600: #2563eb;
+        --dio-violet-500: #6366f1;
+        --dio-border: #e2e8f0;
+        --dio-slate-600: #475569;
+        --dio-slate-500: #64748b;
+        --dio-ink-800: #0f172a;
+        --dio-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes dioFadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+        animation: dioFadeIn 0.5s var(--dio-ease);
+    }
+
+    .premium-card {
+        background: #ffffff;
+        border: 1px solid var(--dio-border);
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+    }
+
+    /* ---- Chat Header ---- */
+    .chat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 22px;
+        border-bottom: 1px solid var(--dio-border);
+        background: #ffffff;
+        flex-shrink: 0;
+    }
+
+    .chat-header .doc-icon {
+        background: #eff6ff;
+        color: #3b82f6;
+    }
+    .chat-header .doc-icon.pdf {
+        background: #fef2f2;
+        color: #ef4444;
+    }
+    .chat-header .doc-icon.docx {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+    .chat-header .doc-icon.txt {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .chat-header .btn-outline-danger {
+        border: 1.5px solid #fecaca;
+        color: #dc2626;
+        background: transparent;
+        font-weight: 600;
+        padding: 7px 16px;
+        transition: all 0.2s var(--dio-ease);
+    }
+    .chat-header .btn-outline-danger:hover {
+        background: #fef2f2;
+        border-color: #dc2626;
+        color: #b91c1c;
+    }
+
+    /* ---- Chat Messages ---- */
+    .chat-messages {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+        background: #f8fafc;
+    }
+
+    .chat-messages::-webkit-scrollbar {
+        width: 6px;
+    }
+    .chat-messages::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 6px;
+    }
+
+    .chat-message {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        max-width: 78%;
+        animation: dioFadeIn 0.35s var(--dio-ease);
+    }
+
+    .chat-message.assistant {
+        align-self: flex-start;
+    }
+
+    .chat-message.user {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+    }
+
+    .message-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        flex-shrink: 0;
+        color: #fff;
+    }
+
+    .chat-message.assistant .message-avatar {
+        background: linear-gradient(135deg, var(--dio-brand-500), var(--dio-violet-500));
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .chat-message.user .message-avatar {
+        background: #334155;
+    }
+
+    .message-content {
+        padding: 12px 16px;
+        border-radius: 16px;
+        font-size: 14px;
+        line-height: 1.65;
+        color: var(--dio-ink-800);
+    }
+
+    .chat-message.assistant .message-content {
+        background: #ffffff;
+        border: 1px solid var(--dio-border);
+        border-top-left-radius: 4px;
+    }
+
+    .chat-message.user .message-content {
+        background: linear-gradient(135deg, var(--dio-brand-500), var(--dio-violet-500));
+        color: #ffffff;
+        border-top-right-radius: 4px;
+    }
+
+    .message-content p:last-child {
+        margin-bottom: 0;
+    }
+
+    /* ---- Sources ---- */
+    .sources-toggle {
+        margin-top: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--dio-brand-600);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: color 0.15s ease;
+    }
+    .sources-toggle:hover {
+        color: var(--dio-violet-500);
+    }
+
+    .sources-list {
+        margin-top: 8px;
+        padding: 12px 14px;
+        background: #f8fafc;
+        border: 1px solid var(--dio-border);
+        border-radius: 10px;
+        font-size: 12.5px;
+        color: var(--dio-slate-600);
+        line-height: 1.6;
+    }
+
+    .sources-list strong {
+        color: var(--dio-ink-800);
+    }
+
+    /* ---- Message actions ---- */
+    .message-actions {
+        margin-top: 6px;
+    }
+
+    .copy-msg-btn {
+        border: none;
+        background: transparent;
+        color: var(--dio-slate-500);
+        font-size: 11.5px;
+        font-weight: 600;
+        padding: 3px 0;
+        cursor: pointer;
+        transition: color 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .copy-msg-btn:hover {
+        color: var(--dio-brand-600);
+    }
+
+    /* ---- Welcome / empty state ---- */
+    .avatar-placeholder {
+        background: linear-gradient(135deg, var(--dio-brand-500), var(--dio-violet-500));
+        color: #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 26px rgba(59, 130, 246, 0.3);
+    }
+
+    .suggested-questions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .suggested-btn {
+        border: 1.5px solid var(--dio-border);
+        background: #ffffff;
+        color: var(--dio-slate-600);
+        padding: 8px 16px;
+        border-radius: 30px;
+        font-size: 12.5px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s var(--dio-ease);
+    }
+    .suggested-btn:hover {
+        border-color: var(--dio-brand-500);
+        color: var(--dio-brand-600);
+        background: #eff6ff;
+        transform: translateY(-1px);
+    }
+
+    /* ---- Chat Input Area ---- */
+    .chat-input-area {
+        padding: 16px 22px;
+        background: #ffffff;
+        border-top: 1px solid var(--dio-border) !important;
+        flex-shrink: 0;
+    }
+
+    .chat-input-wrapper {
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        background: #f8fafc;
+        border: 1.5px solid var(--dio-border);
+        border-radius: 18px;
+        padding: 8px 8px 8px 18px;
+        transition: border-color 0.2s var(--dio-ease), box-shadow 0.2s var(--dio-ease);
+    }
+
+    .chat-input-wrapper:focus-within {
+        border-color: var(--dio-brand-500);
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    .chat-input-wrapper #chat-input {
+        border: none;
+        background: transparent;
+        resize: none;
+        outline: none;
+        font-size: 14px;
+        font-family: inherit;
+        padding: 8px 0;
+        max-height: 140px;
+        color: var(--dio-ink-800);
+    }
+
+    .chat-input-wrapper #chat-input::placeholder {
+        color: #94a3b8;
+    }
+
+    .chat-send-btn {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 50%;
+        border: none;
+        background: linear-gradient(135deg, var(--dio-brand-500), var(--dio-violet-500));
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+        transition: all 0.2s var(--dio-ease);
+    }
+
+    .chat-send-btn:hover {
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 10px 22px rgba(59, 130, 246, 0.4);
+    }
+
+    .chat-send-btn:active {
+        transform: translateY(0) scale(0.98);
+    }
+
+    @media (max-width: 576px) {
+        .chat-message {
+            max-width: 92%;
+        }
+        .chat-header {
+            padding: 12px 14px;
+        }
+        .chat-input-area {
+            padding: 10px 12px;
+        }
+    }
+
+    .chat-card-container {
+        height: calc(100vh - 135px);
+        display: flex;
+        flex-direction: column;
+        border-radius: var(--radius-xl);
+    }
+
+    @media (max-width: 768px) {
+        .chat-card-container {
+            height: calc(100vh - 100px);
+            border-radius: var(--radius-lg);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="premium-card p-0 overflow-hidden animate-fade-in chat-card-container">
+    <!-- Chat Header -->
+    <div class="chat-header">
+        <div class="d-flex align-items-center gap-3">
+            <div class="doc-icon {{ document.file_type }}" style="width: 38px; height: 38px; font-size: 16px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-file-{% if document.file_type == 'pdf' %}pdf{% elif document.file_type == 'docx' %}word{% else %}alt{% endif %}"></i>
+            </div>
+            <div>
+                <h6 class="mb-0 fw-semibold" style="font-size:14px;">{{ document.title }}</h6>
+                <small class="text-muted" style="font-size:12px;">AI Chat Session</small>
+            </div>
+        </div>
+        <button class="btn btn-sm btn-outline-danger" style="font-size:13px; border-radius: var(--radius-full);" onclick="clearChat({{ document.id }})">
+            <i class="fas fa-trash-alt me-1"></i> Clear
+        </button>
+    </div>
+
+    <!-- Chat Messages -->
+    <div class="chat-messages flex-grow-1" id="chat-messages" style="overflow-y: auto; background-color: var(--bg-primary);">
+        {% if messages %}
+            {% for msg in messages %}
+            <div class="chat-message {{ msg.role }}">
+                <div class="message-avatar">
+                    <i class="fas {% if msg.role == 'user' %}fa-user{% else %}fa-robot{% endif %}"></i>
+                </div>
+                <div>
+                    <div class="message-content">
+                        {{ msg.content|linebreaksbr }}
+                    </div>
+                    {% if msg.sources %}
+                    <div class="sources-toggle" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+                        <i class="fas fa-book-open"></i> View Sources ({{ msg.sources|length }})
+                    </div>
+                    <div class="sources-list" style="display:none;">
+                        {% for src in msg.sources %}
+                        <div class="mb-2"><strong>Source {{ forloop.counter }}:</strong> {{ src.text }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="message-actions">
+                        <button class="copy-msg-btn" data-content="{{ msg.content }}">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <!-- Welcome View -->
+            <div class="text-center py-5 mx-auto" style="max-width: 480px;">
+                <div class="avatar-placeholder avatar-lg mb-3 mx-auto" style="font-size:28px; width:64px; height:64px;"><i class="fas fa-robot"></i></div>
+                <h5 class="fw-bold mb-2">Ask anything about this document</h5>
+                <p class="text-muted" style="font-size:14px;">Our AI will process your request and respond with exact page or paragraph citations from the uploaded text.</p>
+
+                {% if suggested_questions %}
+                <div class="mt-4">
+                    <small class="text-muted d-block mb-2 text-start fw-semibold">Suggested Questions:</small>
+                    <div class="suggested-questions">
+                        {% for q in suggested_questions %}
+                        <button class="suggested-btn">{{ q }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Chat Input -->
+    <div class="chat-input-area border-top">
+        <form id="chat-form" data-doc-id="{{ document.id }}" class="chat-input-wrapper">
+            {% csrf_token %}
+            <textarea class="form-control" placeholder="Ask a question about this document..." rows="1" id="chat-input" required></textarea>
+            <button type="submit" class="chat-send-btn" id="chat-send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'js/chat.js' %}?v=2"></script>
+<script>
+// Parse any existing assistant messages with marked.js
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.chat-message.assistant .message-content').forEach(el => {
+        if (typeof marked !== 'undefined') {
+            const rawText = el.textContent.trim();
+            el.innerHTML = marked.parse(rawText);
+        }
+    });
+
+    // Handle copy buttons for historical messages
+    document.querySelectorAll('.copy-msg-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const content = this.getAttribute('data-content');
+            copyToClipboard(content);
+        });
+    });
+});
+</script>
+{% endblock %}

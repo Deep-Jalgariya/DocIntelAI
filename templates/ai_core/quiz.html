@@ -1,0 +1,59 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% block title %}Quiz - {{ document.title }}{% endblock %}
+{% block page_title %}Interactive Quiz{% endblock %}
+{% block active_page %}quiz{% endblock %}
+
+{% block content %}
+<div class="row g-4 animate-fade-in">
+    <!-- Quiz Configuration Panel -->
+    <div class="col-lg-4">
+        <div class="premium-card">
+            <h5 class="mb-4 fw-bold"><i class="fas fa-sliders-h me-2 text-primary"></i>Quiz Configuration</h5>
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-semibold">Question Type</label>
+                <select class="form-select form-control-premium" id="quiz-type">
+                    <option value="mcq" selected>Multiple Choice (MCQ)</option>
+                    <option value="true_false">True / False</option>
+                    <option value="fill_blank">Fill in the Blanks</option>
+                    <option value="short">Short Answer Questions</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-semibold">Difficulty Level</label>
+                <select class="form-select form-control-premium" id="quiz-difficulty">
+                    <option value="easy">Easy</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="form-label text-muted small fw-semibold">Number of Questions</label>
+                <select class="form-select form-control-premium" id="quiz-count">
+                    <option value="3">3 Questions</option>
+                    <option value="5" selected>5 Questions</option>
+                    <option value="10">10 Questions</option>
+                </select>
+            </div>
+            <button class="btn-gradient-primary w-100 justify-content-center" id="generate-quiz-btn" onclick="generateQuiz({{ document.id }})">
+                <i class="fas fa-magic"></i> Generate Quiz
+            </button>
+        </div>
+    </div>
+
+    <!-- Quiz Content and Action Panel -->
+    <div class="col-lg-8">
+        <div class="premium-card d-flex flex-column justify-content-center align-items-center" id="quiz-container" style="min-height: 400px;">
+            <div class="text-center py-5">
+                <i class="fas fa-question-circle text-muted mb-3" style="font-size: 48px; opacity:0.35;"></i>
+                <h5 class="fw-bold mb-2">No Quiz Active</h5>
+                <p class="text-muted small max-width-360 mx-auto">Configure the parameters on the left sidebar and click generate to test your knowledge.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'js/quiz.js' %}"></script>
+{% endblock %}

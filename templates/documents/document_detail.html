@@ -1,0 +1,162 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% block title %}{{ document.title }} - DocIntel{% endblock %}
+{% block page_title %}{{ document.title }}{% endblock %}
+{% block active_page %}documents{% endblock %}
+
+{% block content %}
+<div class="row g-4 animate-fade-in">
+    <!-- Main Workspace Hub -->
+    <div class="col-lg-8">
+        <div class="premium-card mb-4">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-cubes me-2 text-primary"></i>AI Workspace</h5>
+                <span class="badge-premium badge-{{ document.file_type }}">{{ document.file_type|upper }}</span>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6 col-xl-4">
+                    <a href="{% url 'ai_core:chat' document.id %}" class="btn w-100 h-100 p-4 premium-card text-center text-decoration-none d-flex flex-column align-items-center justify-content-center gap-2 hover-lift" style="min-height: 155px;">
+                        <i class="fas fa-comments fs-3 text-primary"></i>
+                        <span class="fw-semibold text-dark" style="font-size:14px;">AI Chat</span>
+                        <small class="text-muted text-wrap small">Ask questions about document</small>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <a href="{% url 'ai_core:summary' document.id %}" class="btn w-100 h-100 p-4 premium-card text-center text-decoration-none d-flex flex-column align-items-center justify-content-center gap-2 hover-lift" style="min-height: 155px;">
+                        <i class="fas fa-align-left fs-3 text-success"></i>
+                        <span class="fw-semibold text-dark" style="font-size:14px;">Summarizer</span>
+                        <small class="text-muted text-wrap small">Generate summaries</small>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <a href="{% url 'ai_core:quiz' document.id %}" class="btn w-100 h-100 p-4 premium-card text-center text-decoration-none d-flex flex-column align-items-center justify-content-center gap-2 hover-lift" style="min-height: 155px;">
+                        <i class="fas fa-question-circle fs-3 text-warning"></i>
+                        <span class="fw-semibold text-dark" style="font-size:14px;">Quiz Generator</span>
+                        <small class="text-muted text-wrap small">Test your knowledge</small>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <a href="{% url 'ai_core:flashcards' document.id %}" class="btn w-100 h-100 p-4 premium-card text-center text-decoration-none d-flex flex-column align-items-center justify-content-center gap-2 hover-lift" style="min-height: 155px;">
+                        <i class="fas fa-clone fs-3 text-info"></i>
+                        <span class="fw-semibold text-dark" style="font-size:14px;">Flashcards</span>
+                        <small class="text-muted text-wrap small">Memorize key points</small>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <a href="{% url 'ai_core:insights' document.id %}" class="btn w-100 h-100 p-4 premium-card text-center text-decoration-none d-flex flex-column align-items-center justify-content-center gap-2 hover-lift" style="min-height: 155px;">
+                        <i class="fas fa-lightbulb fs-3" style="color: var(--tertiary);"></i>
+                        <span class="fw-semibold text-dark" style="font-size:14px;">AI Insights</span>
+                        <small class="text-muted text-wrap small">Extract key facts</small>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <a href="{% url 'documents:viewer' document.id %}" class="btn w-100 h-100 p-4 premium-card text-center text-decoration-none d-flex flex-column align-items-center justify-content-center gap-2 hover-lift" style="min-height: 155px;">
+                        <i class="fas fa-eye fs-3" style="color: var(--danger);"></i>
+                        <span class="fw-semibold text-dark" style="font-size:14px;">Read Document</span>
+                        <small class="text-muted text-wrap small">Open document viewer</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Preview -->
+        <div class="premium-card">
+            <h5 class="mb-3 fw-bold"><i class="fas fa-file-alt me-2 text-primary"></i>Document Text Sample</h5>
+            <div class="p-3 bg-light rounded text-muted" style="max-height: 280px; overflow-y: auto; font-family: var(--font-primary); font-size: 13.5px; white-space: pre-wrap; line-height: 1.6; border-radius: var(--radius-md) !important;">
+                {% if document.text_content %}
+                    {{ document.text_content|slice:":2000" }}...
+                {% else %}
+                    No text content extracted yet.
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Metadata & Details -->
+    <div class="col-lg-4">
+        <div class="premium-card mb-4">
+            <h5 class="mb-3 fw-bold"><i class="fas fa-info-circle me-2 text-primary"></i>File Details</h5>
+            <table class="table table-borderless align-middle mb-0" style="font-size:13.5px;">
+                <tr>
+                    <td class="text-muted py-2">Size</td>
+                    <td class="fw-semibold text-end text-dark">{{ document.file_size_display }}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted py-2">Words</td>
+                    <td class="fw-semibold text-end text-dark">{{ document.word_count }}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted py-2">Characters</td>
+                    <td class="fw-semibold text-end text-dark">{{ document.char_count }}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted py-2">Paragraphs</td>
+                    <td class="fw-semibold text-end text-dark">{{ document.paragraph_count }}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted py-2">Estimated Reading Time</td>
+                    <td class="fw-semibold text-end text-dark">{{ stats.reading_time|default:"1" }} min</td>
+                </tr>
+                <tr>
+                    <td class="text-muted py-2">Reading Difficulty</td>
+                    <td class="fw-semibold text-end">
+                        <span class="badge bg-secondary" style="font-size:11px;">{{ stats.difficulty|default:"Medium" }}</span>
+                    </td>
+                </tr>
+            </table>
+            <hr class="my-3">
+            <div class="d-flex gap-2">
+                <a href="{% url 'documents:download' document.id %}" class="btn btn-outline-premium w-100 justify-content-center" style="font-size:13px; padding:8px 0;">
+                    <i class="fas fa-download"></i> Download File
+                </a>
+            </div>
+        </div>
+
+        <div class="premium-card">
+            <h5 class="mb-3 fw-bold"><i class="fas fa-chart-pie me-2 text-primary"></i>Metadata Analytics</h5>
+            <div style="height: 150px; position: relative;">
+                <canvas id="meta-pie-chart"
+                        data-words="{{ document.word_count|default:0 }}"
+                        data-chars="{{ document.char_count|default:0 }}"
+                        data-paragraphs="{{ document.paragraph_count|default:0 }}"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const canvas = document.getElementById('meta-pie-chart');
+    if (!canvas) return;
+
+    const words = parseInt(canvas.getAttribute('data-words')) || 0;
+    const chars = parseInt(canvas.getAttribute('data-chars')) || 0;
+    const paragraphs = parseInt(canvas.getAttribute('data-paragraphs')) || 0;
+
+    new Chart(canvas, {
+        type: 'pie',
+        data: {
+            labels: ['Words', 'Characters / 5', 'Paragraphs * 10'],
+            datasets: [{
+                data: [words, chars / 5, paragraphs * 10],
+                backgroundColor: ['#6366F1', '#06B6D4', '#A855F7'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 10, usePointStyle: true, font: { size: 10 } }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

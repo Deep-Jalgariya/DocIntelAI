@@ -1,0 +1,80 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% block title %}Analytics - {{ document.title }}{% endblock %}
+{% block page_title %}Document Analytics{% endblock %}
+{% block active_page %}analytics{% endblock %}
+
+{% block content %}
+<div class="row g-4 animate-fade-in">
+    <!-- Main metrics card -->
+    <div class="col-lg-8">
+        <div class="premium-card">
+            <h5 class="mb-4 fw-bold"><i class="fas fa-chart-pie me-2 text-primary"></i>Structural Metrics</h5>
+            <div class="row g-3 text-center">
+                <div class="col-6 col-md-3">
+                    <div class="p-3 bg-light rounded" style="border-radius: var(--radius-md) !important;">
+                        <div class="fs-4 fw-bold text-dark mb-1">{{ stats.word_count|default:"0" }}</div>
+                        <div class="text-muted small">Words</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 bg-light rounded" style="border-radius: var(--radius-md) !important;">
+                        <div class="fs-4 fw-bold text-dark mb-1">{{ stats.char_count|default:"0" }}</div>
+                        <div class="text-muted small">Characters</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 bg-light rounded" style="border-radius: var(--radius-md) !important;">
+                        <div class="fs-4 fw-bold text-dark mb-1">{{ stats.paragraph_count|default:"0" }}</div>
+                        <div class="text-muted small">Paragraphs</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 bg-light rounded" style="border-radius: var(--radius-md) !important;">
+                        <div class="fs-4 fw-bold text-dark mb-1">{{ stats.avg_sentence_length|default:"0" }}</div>
+                        <div class="text-muted small">Avg Sentence Length</div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <h5 class="mb-3 fw-bold"><i class="fas fa-align-left me-2 text-primary"></i>Longest Paragraph Sample</h5>
+            <div class="p-3 bg-light rounded text-muted small" style="line-height: 1.6; white-space: pre-wrap; border-radius: var(--radius-md) !important; font-size:13.5px;">
+                {{ longest_paragraph|default:"No paragraphs identified." }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Common words chart -->
+    <div class="col-lg-4">
+        <div class="premium-card mb-4">
+            <h5 class="mb-3 fw-bold"><i class="fas fa-file-word me-2 text-primary"></i>Reading Metrics</h5>
+            <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                <span class="text-muted small">Estimated Reading Time</span>
+                <span class="fw-bold text-dark">{{ stats.reading_time|default:"1" }} minutes</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="text-muted small">Flesch Grade Level</span>
+                <span class="badge bg-secondary" style="font-size:11px;">{{ stats.difficulty|default:"Medium" }}</span>
+            </div>
+        </div>
+
+        <div class="premium-card">
+            <h5 class="mb-3 fw-bold"><i class="fas fa-list-ol me-2 text-primary"></i>Most Common Words</h5>
+            <div style="max-height: 240px; overflow-y: auto;">
+                {% if most_common_words %}
+                    {% for word, count in most_common_words %}
+                    <div class="d-flex justify-content-between align-items-center mb-2 p-1 rounded hover-bg-light" style="font-size:13.5px;">
+                        <span class="text-secondary fw-semibold">{{ word }}</span>
+                        <span class="fw-bold text-dark">{{ count }}x</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted small">No common words metrics available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

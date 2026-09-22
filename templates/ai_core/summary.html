@@ -1,0 +1,108 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% block title %}Summary - {{ document.title }}{% endblock %}
+{% block page_title %}AI Summary{% endblock %}
+{% block active_page %}summary{% endblock %}
+
+{% block content %}
+<div class="row g-4 animate-fade-in">
+    <!-- Main Summary Board -->
+    <div class="col-lg-8">
+        <div class="premium-card">
+            <!-- Summary Type Tabs -->
+            <div class="d-flex gap-2 pb-3 mb-4 overflow-auto border-bottom scroll-touch align-items-center" id="summary-tabs"
+                style="scrollbar-width: none; -ms-overflow-style: none;">
+                <button class="btn btn-sm btn-outline-premium summary-type-btn text-nowrap active" data-type="short"
+                    onclick="generateSummary({{ document.id }}, 'short')">Short</button>
+                <button class="btn btn-sm btn-outline-premium summary-type-btn text-nowrap" data-type="medium"
+                    onclick="generateSummary({{ document.id }}, 'medium')">Medium</button>
+                <button class="btn btn-sm btn-outline-premium summary-type-btn text-nowrap" data-type="detailed"
+                    onclick="generateSummary({{ document.id }}, 'detailed')">Detailed</button>
+                <button class="btn btn-sm btn-outline-premium summary-type-btn text-nowrap" data-type="bullet"
+                    onclick="generateSummary({{ document.id }}, 'bullet')">Bullets</button>
+                <button class="btn btn-sm btn-outline-premium summary-type-btn text-nowrap" data-type="executive"
+                    onclick="generateSummary({{ document.id }}, 'executive')">Executive</button>
+            </div>
+
+            <!-- Summary Content Display Area -->
+            <div id="summary-content" class="lh-lg"
+                style="min-height: 240px; font-size:14px; color: var(--text-primary);">
+                {% if summaries.short %}
+                <div class="summary-text">{{ summaries.short.content|linebreaksbr }}</div>
+                <div class="d-flex flex-wrap gap-2 mt-4 pt-2 border-top">
+                    <button class="btn btn-sm btn-outline-premium flex-grow-1 flex-sm-grow-0"
+                        onclick="copyToClipboard(document.querySelector('.summary-text').innerText)">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                    <button class="btn btn-sm btn-outline-premium flex-grow-1 flex-sm-grow-0"
+                        onclick="generateSummary({{ document.id }}, 'short')">
+                        <i class="fas fa-redo"></i> Regenerate
+                    </button>
+                    <button class="btn btn-sm btn-outline-premium flex-grow-1 flex-sm-grow-0" onclick="translateSummary({{ document.id }})">
+                        <i class="fas fa-language"></i> Translate
+                    </button>
+                    <button class="btn btn-sm btn-outline-premium flex-grow-1 flex-sm-grow-0" id="tts-play"
+                        onclick="initTTS(document.querySelector('.summary-text').innerText)">
+                        <i class="fas fa-volume-up"></i> Read Aloud
+                    </button>
+                    <button class="btn btn-sm btn-outline-premium flex-grow-1 flex-sm-grow-0" id="tts-pause" style="display:none"
+                        onclick="pauseTTS()">
+                        <i class="fas fa-pause"></i> Pause
+                    </button>
+                    <button class="btn btn-sm btn-outline-premium flex-grow-1 flex-sm-grow-0" id="tts-resume" style="display:none"
+                        onclick="resumeTTS()">
+                        <i class="fas fa-play"></i> Resume
+                    </button>
+                    <button class="btn btn-sm btn-outline-premium flex-grow-1 flex-sm-grow-0" id="tts-stop" style="display:none"
+                        onclick="stopTTS()">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-align-left text-muted mb-3" style="font-size: 40px; opacity:0.3;"></i>
+                    <h5 class="fw-bold mb-2">No Summary Generated</h5>
+                    <p class="text-muted" style="font-size:14px;">Choose a summary type above and generate an AI-powered
+                        overview of the document.</p>
+                    <button class="btn-gradient-primary mt-2" onclick="generateSummary({{ document.id }}, 'short')">
+                        <i class="fas fa-magic"></i> Generate Summary
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Reading Settings -->
+    <div class="col-lg-4">
+        <div class="premium-card">
+            <h6 class="mb-3 fw-bold"><i class="fas fa-cogs me-2" style="color: var(--primary);"></i>Reading Settings
+            </h6>
+            <div class="mb-3">
+                <label class="form-label text-muted" style="font-size:13px;">Speech Speed</label>
+                <select class="form-select form-control-premium" id="tts-speed" onchange="setTTSSpeed(this.value)">
+                    <option value="0.75">0.75x (Slow)</option>
+                    <option value="1.0" selected>1.0x (Normal)</option>
+                    <option value="1.25">1.25x (Medium Fast)</option>
+                    <option value="1.5">1.5x (Fast)</option>
+                    <option value="2.0">2.0x (Double Speed)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'js/features.js' %}?v=2"></script>
+<script>
+    // Format initial summary as markdown if needed
+    document.addEventListener('DOMContentLoaded', function () {
+        const sumTextEl = document.querySelector('.summary-text');
+        if (sumTextEl && typeof marked !== 'undefined') {
+            const raw = sumTextEl.textContent.trim();
+            sumTextEl.innerHTML = marked.parse(raw);
+        }
+    });
+</script>
+{% endblock %}

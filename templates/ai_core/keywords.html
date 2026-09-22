@@ -1,0 +1,62 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Keywords - {{ document.title }}{% endblock %}
+{% block page_title %}Keyword Extraction{% endblock %}
+{% block active_page %}keywords{% endblock %}
+
+{% block content %}
+<div class="row g-4 animate-fade-in">
+    <!-- Keywords Stats & List -->
+    <div class="col-lg-8">
+        <div class="premium-card">
+            <h5 class="mb-4 fw-bold"><i class="fas fa-tags me-2 text-primary"></i>Top Keywords & Terms</h5>
+            
+            {% if keywords %}
+                <div class="row g-3">
+                    {% for kw in keywords %}
+                    <div class="col-md-6 col-xl-4">
+                        <div class="premium-card p-3 border-light h-100" style="border-left: 4px solid var(--primary) !important;">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="fw-bold text-dark text-truncate" style="max-width: 140px;">{{ kw.word }}</span>
+                                <span class="badge bg-primary rounded-pill" style="font-size: 11px; padding: 4px 8px;">{{ kw.frequency }} times</span>
+                            </div>
+                            <div class="progress-premium mb-2" style="height: 5px;">
+                                <div class="progress-bar-premium" style="width: {% widthratio kw.importance 1 100 %}%;"></div>
+                            </div>
+                            <div class="text-end text-muted" style="font-size: 11px;">
+                                Importance: {{ kw.importance|floatformat:4 }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-key text-muted mb-3" style="font-size:48px; opacity:0.35;"></i>
+                    <h5 class="fw-bold mb-2">No Keywords Extracted</h5>
+                    <p class="text-muted small">Please verify that the document is processed successfully.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Word Cloud -->
+    <div class="col-lg-4">
+        <div class="premium-card h-100">
+            <h5 class="mb-4 fw-bold"><i class="fas fa-cloud me-2 text-primary"></i>Visual Word Cloud</h5>
+            <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 p-4 bg-light rounded text-center" style="min-height: 250px; border-radius: var(--radius-lg) !important;">
+                {% if keywords %}
+                    {% for kw in keywords %}
+                        <span style="font-size: {{ kw.importance|multiply:24|add_val:12 }}px; color: var(--{% if forloop.counter|divisibleby:3 %}primary{% elif forloop.counter|divisibleby:2 %}accent{% else %}tertiary{% endif %}); font-weight: bold; opacity: {{ kw.importance|add_val:0.3 }}; display: inline-block;">
+                            {{ kw.word }}
+                        </span>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted small">No keywords detected to display word cloud.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

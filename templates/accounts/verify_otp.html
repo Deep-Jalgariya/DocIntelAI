@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Verify OTP - DocIntel{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}?v=3">
+<style>
+    :root {
+        --auth-ink-900: #0b1220;
+        --auth-ink-800: #0f172a;
+        --auth-muted: #64748b;
+        --auth-border: #e5eaf1;
+        --auth-brand-500: #3b82f6;
+        --auth-brand-600: #2563eb;
+        --auth-violet-500: #6366f1;
+        --auth-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .auth-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 20px;
+        background:
+            radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.12), transparent 45%),
+            radial-gradient(circle at 85% 85%, rgba(99, 102, 241, 0.10), transparent 45%),
+            linear-gradient(180deg, var(--auth-ink-800) 0%, var(--auth-ink-900) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-page::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 56px 56px;
+        mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 10%, transparent 75%);
+        -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 10%, transparent 75%);
+        pointer-events: none;
+    }
+
+    .auth-card {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 440px;
+        background: #ffffff;
+        border-radius: 22px;
+        padding: 44px 40px 36px;
+        box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35), 0 2px 0 rgba(255, 255, 255, 0.04) inset;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        animation: authCardIn 0.5s var(--auth-ease);
+    }
+
+    @keyframes authCardIn {
+        from { opacity: 0; transform: translateY(16px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+
+    .auth-logo {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        margin: 0 auto 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        color: #fff;
+        background: linear-gradient(135deg, var(--auth-brand-500), var(--auth-violet-500));
+        box-shadow: 0 10px 26px rgba(59, 130, 246, 0.35);
+    }
+
+    .auth-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--auth-ink-800);
+        letter-spacing: -0.5px;
+        margin-bottom: 6px;
+    }
+
+    .auth-subtitle {
+        font-size: 14px;
+        color: var(--auth-muted);
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .email-highlight {
+        color: var(--auth-brand-600);
+        font-weight: 600;
+    }
+
+    .otp-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin: 24px 0 16px;
+    }
+
+    .otp-digit-box {
+        width: 50px;
+        height: 56px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--auth-ink-800);
+        background: #f8fafc;
+        border: 2px solid var(--auth-border);
+        border-radius: 12px;
+        outline: none;
+        transition: all 0.2s var(--auth-ease);
+    }
+
+    .otp-digit-box:focus {
+        border-color: var(--auth-brand-500);
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .btn-auth {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 13px 20px;
+        margin-top: 10px;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.25s var(--auth-ease);
+    }
+
+    .btn-gradient-primary.btn-auth {
+        background: linear-gradient(135deg, var(--auth-brand-500), var(--auth-violet-500));
+        box-shadow: 0 10px 28px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-gradient-primary.btn-auth:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 36px rgba(59, 130, 246, 0.4);
+        background: linear-gradient(135deg, var(--auth-brand-600), #4f46e5);
+    }
+
+    .resend-section {
+        text-align: center;
+        margin-top: 22px;
+        font-size: 14px;
+        color: var(--auth-muted);
+    }
+
+    .timer-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f1f5f9;
+        color: var(--auth-ink-800);
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 13px;
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid var(--auth-border);
+        font-size: 14px;
+        color: var(--auth-muted);
+    }
+
+    .auth-footer a, .resend-link {
+        color: var(--auth-brand-600);
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .auth-footer a:hover, .resend-link:hover {
+        color: var(--auth-violet-500);
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo" style="background:transparent;box-shadow:none;margin-bottom:12px;"><img src="{% static 'images/logo.png' %}" alt="DocIntel AI" style="height: 64px; width: auto; object-fit: contain;"></div>
+            <h3 class="auth-title">Verify OTP Code</h3>
+            <p class="auth-subtitle">We have sent a 6-digit OTP code to<br><span class="email-highlight">{{ user_email }}</span></p>
+        </div>
+
+        <form method="post" id="otp-form">
+            {% csrf_token %}
+            <input type="hidden" name="otp_code" id="otp_code_hidden">
+
+            <div class="otp-container">
+                <input type="text" maxlength="1" class="otp-digit-box" autofocus pattern="[0-9]" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit-box" pattern="[0-9]" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit-box" pattern="[0-9]" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit-box" pattern="[0-9]" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit-box" pattern="[0-9]" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit-box" pattern="[0-9]" inputmode="numeric">
+            </div>
+
+            <button type="submit" class="btn-gradient-primary btn-auth">
+                <i class="fas fa-check-circle"></i> Verify OTP
+            </button>
+        </form>
+
+        <div class="resend-section">
+            <p>Code expires in: <span class="timer-badge"><i class="far fa-clock"></i> <span id="timer">10:00</span></span></p>
+            <p style="margin-top: 8px;">Didn't receive code? <a href="{% url 'accounts:resend_otp' %}" class="resend-link"><i class="fas fa-redo-alt"></i> Resend OTP</a></p>
+        </div>
+
+        <div class="auth-footer">
+            Incorrect email address? <a href="{% url 'accounts:forgot_password' %}">Change Email</a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('.otp-digit-box');
+    const form = document.getElementById('otp-form');
+    const hiddenInput = document.getElementById('otp_code_hidden');
+
+    inputs.forEach((input, index) => {
+        input.addEventListener('keyup', (e) => {
+            if (e.key >= '0' && e.key <= '9') {
+                if (index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            } else if (e.key === 'Backspace') {
+                if (index > 0) {
+                    inputs[index - 1].focus();
+                }
+            }
+        });
+
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pasteData = (e.clipboardData || window.clipboardData).getData('text').trim();
+            if (/^\d{6}$/.test(pasteData)) {
+                pasteData.split('').forEach((char, i) => {
+                    if (inputs[i]) inputs[i].value = char;
+                });
+                inputs[inputs.length - 1].focus();
+            }
+        });
+    });
+
+    form.addEventListener('submit', function(e) {
+        let code = '';
+        inputs.forEach(input => code += input.value.trim());
+        hiddenInput.value = code;
+    });
+
+    // 10-minute countdown timer
+    let timeLeft = 600;
+    const timerElem = document.getElementById('timer');
+    const timerInterval = setInterval(() => {
+        let minutes = Math.floor(timeLeft / 60);
+        let seconds = timeLeft % 60;
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        if (timerElem) timerElem.textContent = `${minutes}:${seconds}`;
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            if (timerElem) timerElem.textContent = 'Expired';
+        }
+        timeLeft--;
+    }, 1000);
+});
+</script>
+{% endblock %}

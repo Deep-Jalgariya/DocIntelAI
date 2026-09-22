@@ -1,0 +1,245 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Edit Profile - DocIntel{% endblock %}
+{% block page_title %}Edit Profile{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    :root {
+        --dio-brand-500: #3b82f6;
+        --dio-brand-600: #2563eb;
+        --dio-violet-500: #6366f1;
+        --dio-warning-500: #f59e0b;
+        --dio-border: #e2e8f0;
+        --dio-slate-600: #475569;
+        --dio-slate-500: #64748b;
+        --dio-ink-800: #0f172a;
+        --dio-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes dioFadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+        animation: dioFadeIn 0.5s var(--dio-ease);
+    }
+
+    /* ---- Premium Card ---- */
+    .premium-card {
+        background: #ffffff;
+        border: 1px solid var(--dio-border);
+        border-radius: 18px;
+        padding: 28px;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+        transition: box-shadow 0.25s var(--dio-ease);
+    }
+
+    .premium-card:hover {
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+    }
+
+    .premium-card h5 {
+        font-size: 16px;
+        color: var(--dio-ink-800);
+        letter-spacing: -0.1px;
+    }
+
+    .premium-card .text-primary {
+        color: var(--dio-brand-500) !important;
+    }
+
+    .premium-card .text-warning {
+        color: var(--dio-warning-500) !important;
+    }
+
+    /* ---- Form labels ---- */
+    .premium-card .form-label {
+        font-size: 12.5px !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--dio-slate-500) !important;
+        margin-bottom: 7px;
+        display: block;
+    }
+
+    /* ---- Generic input styling for Django-rendered fields ---- */
+    .premium-card form input[type="text"],
+    .premium-card form input[type="email"],
+    .premium-card form input[type="tel"],
+    .premium-card form input[type="file"],
+    .premium-card form textarea,
+    .premium-card form select {
+        width: 100%;
+        padding: 11px 15px;
+        font-size: 14px;
+        font-family: inherit;
+        color: var(--dio-ink-800);
+        background: #f8fafc;
+        border: 1.5px solid var(--dio-border);
+        border-radius: 10px;
+        transition: border-color 0.2s var(--dio-ease), box-shadow 0.2s var(--dio-ease), background 0.2s var(--dio-ease);
+        outline: none;
+    }
+
+    .premium-card form input::placeholder,
+    .premium-card form textarea::placeholder {
+        color: #a3adc2;
+    }
+
+    .premium-card form input:hover,
+    .premium-card form textarea:hover,
+    .premium-card form select:hover {
+        border-color: #c7d2e0;
+    }
+
+    .premium-card form input:focus,
+    .premium-card form textarea:focus,
+    .premium-card form select:focus {
+        border-color: var(--dio-brand-500);
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    .premium-card form textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .premium-card form input[type="file"] {
+        padding: 9px 12px;
+        cursor: pointer;
+        color: var(--dio-slate-600);
+    }
+
+    .premium-card form input[type="file"]::file-selector-button {
+        border: none;
+        background: var(--dio-brand-500);
+        color: #fff;
+        font-weight: 600;
+        font-size: 12.5px;
+        padding: 7px 14px;
+        border-radius: 7px;
+        margin-right: 12px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .premium-card form input[type="file"]:hover::file-selector-button {
+        background: var(--dio-brand-600);
+    }
+
+    /* ---- Buttons ---- */
+    .btn-gradient-primary {
+        background: linear-gradient(135deg, var(--dio-brand-500), var(--dio-violet-500));
+        color: #fff;
+        border: none;
+        padding: 11px 26px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        cursor: pointer;
+        box-shadow: 0 8px 22px rgba(59, 130, 246, 0.28);
+        transition: all 0.2s var(--dio-ease);
+    }
+
+    .btn-gradient-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(59, 130, 246, 0.36);
+        color: #fff;
+    }
+
+    .btn-outline-premium {
+        border: 1.5px solid var(--dio-border);
+        color: var(--dio-slate-600);
+        background: transparent;
+        padding: 11px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        transition: all 0.2s var(--dio-ease);
+    }
+
+    .btn-outline-premium:hover {
+        border-color: var(--dio-brand-500);
+        color: var(--dio-brand-600);
+        background: #eff6ff;
+    }
+
+    @media (max-width: 576px) {
+        .premium-card {
+            padding: 20px;
+        }
+        .premium-card form .d-flex.gap-3 {
+            flex-direction: column;
+        }
+        .btn-gradient-primary,
+        .btn-outline-premium {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center animate-fade-in">
+    <div class="col-lg-8">
+        <div class="premium-card">
+            <h5 class="mb-4 fw-bold"><i class="fas fa-user-edit me-2 text-primary"></i>Edit Your Profile</h5>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-muted small">First Name</label>
+                        {{ user_form.first_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-muted small">Last Name</label>
+                        {{ user_form.last_name }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold text-muted small">Email</label>
+                        {{ user_form.email }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold text-muted small">Profile Picture</label>
+                        {{ profile_form.avatar }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold text-muted small">Bio</label>
+                        {{ profile_form.bio }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-muted small">Phone</label>
+                        {{ profile_form.phone }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-muted small">Organization</label>
+                        {{ profile_form.organization }}
+                    </div>
+                </div>
+                <div class="d-flex gap-3 mt-4">
+                    <button type="submit" class="btn-gradient-primary"><i class="fas fa-save"></i> Save Changes</button>
+                    <a href="{% url 'accounts:profile' %}" class="btn-outline-premium">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="premium-card mt-4">
+            <h5 class="mb-3 fw-bold"><i class="fas fa-lock me-2 text-warning"></i>Change Password</h5>
+            <p class="text-muted small">Want to change your current account password?</p>
+            <a href="{% url 'accounts:change_password' %}" class="btn-outline-premium"><i class="fas fa-key"></i> Change Password</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

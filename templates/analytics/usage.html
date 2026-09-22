@@ -1,0 +1,59 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% block title %}Usage Analytics - DocIntel{% endblock %}
+{% block page_title %}Usage Analytics{% endblock %}
+{% block active_page %}analytics{% endblock %}
+
+{% block content %}
+<div class="row g-4 animate-fade-in">
+    <!-- Log details -->
+    <div class="col-lg-8">
+        <div class="premium-card">
+            <h5 class="mb-4 fw-bold"><i class="fas fa-history me-2 text-primary"></i>All Recorded Activities</h5>
+            <div class="table-responsive">
+                <table class="table align-middle" style="font-size:13.5px;">
+                    <thead>
+                        <tr class="text-muted">
+                            <th class="border-0 pb-3" style="font-weight:600;">Action Type</th>
+                            <th class="border-0 pb-3" style="font-weight:600;">Details</th>
+                            <th class="border-0 pb-3" style="font-weight:600;">Date / Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_activities %}
+                            {% for act in recent_activities %}
+                            <tr>
+                                <td class="py-3">
+                                    <span class="badge-premium" style="background: {{ act.color }}18; color: {{ act.color }}; border: 1px solid {{ act.color }}30; font-size: 11px;">
+                                        <i class="fas {{ act.icon }} me-1"></i> {{ act.get_action_type_display }}
+                                    </span>
+                                </td>
+                                <td class="py-3 text-dark fw-semibold">{{ act.details }}</td>
+                                <td class="py-3 text-secondary"><small>{{ act.timestamp|date:"d M Y, g:i a" }}</small></td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center py-5 text-muted">
+                                    No actions recorded yet.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage summaries -->
+    <div class="col-lg-4">
+        <div class="premium-card">
+            <h5 class="mb-3 fw-bold"><i class="fas fa-chart-line me-2 text-primary"></i>Summary Stats</h5>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted small">Total Recorded Activities</span>
+                <span class="fw-bold text-dark fs-5">{{ total_activities }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

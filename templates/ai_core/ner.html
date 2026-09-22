@@ -1,0 +1,70 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% block title %}Entities - {{ document.title }}{% endblock %}
+{% block page_title %}Named Entity Recognition (NER){% endblock %}
+{% block active_page %}ner{% endblock %}
+
+{% block content %}
+<div class="row g-4 animate-fade-in">
+    <!-- Configuration & Stats -->
+    <div class="col-lg-3">
+        <div class="premium-card">
+            <h5 class="mb-3 fw-bold"><i class="fas fa-tags me-2 text-primary"></i>NER Info</h5>
+            <p class="text-muted small" style="line-height:1.6;">Our AI automatically scans the text to identify named entities like people, organizations, locations, currencies, emails, and phone numbers.</p>
+            <div class="border-top pt-3 mt-3">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small">Total Entities</span>
+                    <span class="fw-bold">{{ entity_groups|length }} types</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Entities Board -->
+    <div class="col-lg-9">
+        {% if entity_groups %}
+            <div class="row g-4">
+                {% for type, entities in entity_groups.items %}
+                <div class="col-md-6 col-xl-4">
+                    <div class="premium-card h-100">
+                        <h6 class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom fw-bold" style="font-size:14px;">
+                            {% if type == 'PERSON' %}
+                                <i class="fas fa-user text-primary"></i> People
+                            {% elif type == 'ORG' %}
+                                <i class="fas fa-building text-success"></i> Organizations
+                            {% elif type == 'GPE' %}
+                                <i class="fas fa-map-marker-alt text-danger"></i> Locations
+                            {% elif type == 'DATE' %}
+                                <i class="fas fa-calendar-alt text-warning"></i> Dates
+                            {% elif type == 'MONEY' %}
+                                <i class="fas fa-dollar-sign text-info"></i> Money / Currency
+                            {% elif type == 'PHONE' %}
+                                <i class="fas fa-phone text-secondary"></i> Phone Numbers
+                            {% elif type == 'EMAIL' %}
+                                <i class="fas fa-envelope text-dark"></i> Emails
+                            {% else %}
+                                <i class="fas fa-tag"></i> {{ type }}
+                            {% endif %}
+                        </h6>
+                        <div style="max-height: 240px; overflow-y: auto;">
+                            {% for ent in entities %}
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 hover-bg-light" style="border-radius:var(--radius-sm); font-size:13.5px;">
+                                <span class="text-dark fw-semibold text-truncate" style="max-width: 70%;" title="{{ ent.text }}">{{ ent.text }}</span>
+                                <span class="badge bg-secondary rounded-pill">{{ ent.count }}x</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="premium-card text-center py-5">
+                <i class="fas fa-tags text-muted mb-3" style="font-size:48px; opacity:0.35;"></i>
+                <h5 class="fw-bold mb-2">No Entities Detected</h5>
+                <p class="text-muted small">Verify that the document contains entity data or try reprocessing it.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

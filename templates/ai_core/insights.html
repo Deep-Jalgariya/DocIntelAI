@@ -1,0 +1,127 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{% block title %}AI Insights - {{ document.title }}{% endblock %}
+{% block page_title %}AI Insights & Action Items{% endblock %}
+{% block active_page %}insights{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <h5 class="mb-0 text-muted" style="font-size:14px;"><i class="fas fa-lightbulb me-2 text-warning"></i>Automated Deep Analysis</h5>
+    <button class="btn-gradient-primary" id="generate-insights-btn" onclick="generateInsights({{ document.id }})">
+        <i class="fas fa-magic"></i> Generate Insights
+    </button>
+</div>
+
+<div id="insights-container" style="min-height: 400px; display: flex; align-items: center; justify-content: center;">
+    {% if insights %}
+        <div class="row g-4 w-100 animate-fade-in">
+            {% if insights.main_objective %}
+            <div class="col-md-6">
+                <div class="premium-card h-100" style="border-left: 4px solid var(--primary)">
+                    <h6 class="d-flex align-items-center gap-2 mb-3 fw-bold" style="font-size:14px; color: var(--primary)">
+                        <i class="fas fa-bullseye"></i> Main Objective
+                    </h6>
+                    <p class="mb-0 text-dark small" style="line-height:1.7;">{{ insights.main_objective }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if insights.important_facts %}
+            <div class="col-md-6">
+                <div class="premium-card h-100" style="border-left: 4px solid var(--success)">
+                    <h6 class="d-flex align-items-center gap-2 mb-3 fw-bold" style="font-size:14px; color: var(--success)">
+                        <i class="fas fa-check-circle"></i> Important Facts
+                    </h6>
+                    <ul class="mb-0 ps-3 text-dark small" style="line-height:1.7;">
+                        {% for fact in insights.important_facts %}
+                        <li class="mb-2">{{ fact }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if insights.important_dates %}
+            <div class="col-md-6">
+                <div class="premium-card h-100" style="border-left: 4px solid var(--warning)">
+                    <h6 class="d-flex align-items-center gap-2 mb-3 fw-bold" style="font-size:14px; color: var(--warning)">
+                        <i class="fas fa-calendar"></i> Important Dates
+                    </h6>
+                    <ul class="mb-0 ps-3 text-dark small" style="line-height:1.7;">
+                        {% for date in insights.important_dates %}
+                        <li class="mb-2">{{ date }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if insights.important_numbers %}
+            <div class="col-md-6">
+                <div class="premium-card h-100" style="border-left: 4px solid var(--tertiary)">
+                    <h6 class="d-flex align-items-center gap-2 mb-3 fw-bold" style="font-size:14px; color: var(--tertiary)">
+                        <i class="fas fa-hashtag"></i> Key Numbers
+                    </h6>
+                    <ul class="mb-0 ps-3 text-dark small" style="line-height:1.7;">
+                        {% for num in insights.important_numbers %}
+                        <li class="mb-2">{{ num }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if insights.action_items %}
+            <div class="col-md-6">
+                <div class="premium-card h-100" style="border-left: 4px solid #ec4899">
+                    <h6 class="d-flex align-items-center gap-2 mb-3 fw-bold" style="font-size:14px; color: #ec4899">
+                        <i class="fas fa-tasks"></i> Action Items
+                    </h6>
+                    <ul class="mb-0 ps-3 text-dark small" style="line-height:1.7;">
+                        {% for item in insights.action_items %}
+                        <li class="mb-2">{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if insights.conclusion %}
+            <div class="col-md-6">
+                <div class="premium-card h-100" style="border-left: 4px solid var(--accent)">
+                    <h6 class="d-flex align-items-center gap-2 mb-3 fw-bold" style="font-size:14px; color: var(--accent)">
+                        <i class="fas fa-flag-checkered"></i> Conclusion
+                    </h6>
+                    <p class="mb-0 text-dark small" style="line-height:1.7;">{{ insights.conclusion }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if insights.recommendations %}
+            <div class="col-12">
+                <div class="premium-card h-100" style="border-left: 4px solid #f97316">
+                    <h6 class="d-flex align-items-center gap-2 mb-3 fw-bold" style="font-size:14px; color: #f97316">
+                        <i class="fas fa-lightbulb"></i> Recommendations
+                    </h6>
+                    <ul class="mb-0 ps-3 text-dark small" style="line-height:1.7;">
+                        {% for rec in insights.recommendations %}
+                        <li class="mb-2">{{ rec }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-lightbulb text-muted mb-3" style="font-size: 48px; opacity:0.35;"></i>
+            <h5 class="fw-bold mb-2">No Insights Generated</h5>
+            <p class="text-muted small">Click the "Generate Insights" button above to run structured document analysis.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'js/features.js' %}?v=2"></script>
+{% endblock %}
